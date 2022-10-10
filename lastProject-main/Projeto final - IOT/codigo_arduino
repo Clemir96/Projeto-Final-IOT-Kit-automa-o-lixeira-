@@ -1,0 +1,125 @@
+#include <Servo.h>
+Servo servo;
+
+
+//Definições de constantes
+int pos = 0;
+
+//sensor esquerda
+const int trigPin = 4;
+const int echoPin = 3;
+
+//leds
+int orange = 5;
+int red = 6;
+
+//sensor direito
+const int trigPin2 = 8;
+const int echoPin2 = 9;
+int buzzer = 7;
+
+
+long duration;
+long duration2;
+float distance;
+float distance2;
+
+void setup()
+{
+  
+//sensor esquerda
+pinMode(trigPin, OUTPUT);
+pinMode(echoPin, INPUT);
+//Leds
+pinMode(orange, OUTPUT);
+pinMode(red, OUTPUT);
+////sensor direito
+pinMode(trigPin2, OUTPUT);
+pinMode(echoPin2, INPUT);
+//campainha
+pinMode(buzzer, INPUT);
+  
+servo.write(pos);
+servo.attach(2);
+}
+
+void loop()
+{
+  Serial.begin(9600);
+  
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  duration = pulseIn(echoPin, HIGH);
+  distance = 0.034*(duration/2);
+  
+  digitalWrite(red, LOW);
+  digitalWrite(orange, LOW);
+  
+  
+  //Abaixo de 10
+  //Acende o led vermelho
+  if (distance < 10) {
+    digitalWrite(red, HIGH);
+    
+    digitalWrite(orange, LOW);
+  }
+  //Distância igual a 10 ou 30/Distância entre 10 e 30
+  //Acende o led laranja
+  else if ((distance <=30) && (distance >= 10)){
+    
+    digitalWrite(red, LOW);
+    digitalWrite(orange, HIGH);
+    delay(500);
+  }
+  
+  else {
+    
+    digitalWrite(red, LOW);
+    digitalWrite(orange, LOW);
+    delay(500);
+  }
+  
+  //Distância menor que 10
+  //Liga o buzzer
+  if (distance < 10){
+    tone(buzzer, 1000, 500);
+  }
+  
+  else {
+   pinMode(buzzer, INPUT);
+   noTone(buzzer);
+  }
+  
+  //sensor2
+  digitalWrite(trigPin2, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin2, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin2, LOW);
+  digitalWrite(buzzer, LOW);
+  duration2 = pulseIn(echoPin2, HIGH);
+  distance2 = 0.034*(duration2/2);
+  Serial.println(distance2);
+  
+  //Motor servo - Abre a lixeira
+  if (distance2 < 50)
+  {
+    
+    servo.write(pos+45);
+    delay(100);
+  }
+  else
+  {
+    servo.write(pos);
+  }
+  delay(60);
+  //Status de espaço livre na lixeira/Staus de distância da lixeira
+  Serial.print("Espaco restante: ");
+  Serial.println(distance);
+  Serial.print("Distancia da lixeira: ");
+  Serial.println(distance2);
+}
